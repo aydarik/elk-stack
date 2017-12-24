@@ -1,0 +1,49 @@
+version: '2.1'
+services:
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:6.1.1
+    restart: always
+    command: filebeat -e -strict.perms=false
+    volumes:
+      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    user: root
+    depends_on:
+      - logstash
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:6.1.1
+    restart: always
+    ports:
+      - 5044:5044
+    volumes:
+      - ./logstash/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+      - ./logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro
+    depends_on:
+      - elasticsearch
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.1.1
+    restart: always
+    ports:
+      - 9200:9200
+    volumes:
+      - ./elasticsearch/data:/usr/share/elasticsearch/data:rw
+      - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:6.1.1
+    restart: always
+    ports:
+      - 5601:5601
+    volumes:
+      - ./kibana/kibana.yml:/usr/share/kibana/config/kibana.yml:ro
+    depends_on:
+      - elasticsearch
+
+  curator:
+    image: aydarik/elk-curator
+    restart: always
+    depends_on:
+      - elasticsearch

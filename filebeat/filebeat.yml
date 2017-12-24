@@ -1,0 +1,17 @@
+filebeat.prospectors:
+- type: log
+  paths:
+   - '/var/lib/docker/containers/bb0a59b0a5b8*/bb0a59b0a5b8*-json.log'
+   - '/var/lib/docker/containers/2165d9ab62b9*/2165d9ab62b9*-json.log'
+   - '/var/lib/docker/containers/8a91255fc9c4*/8a91255fc9c4*-json.log'
+  json:
+    message_key: log
+    keys_under_root: true
+  processors:
+    - add_docker_metadata: ~
+  multiline:
+    pattern: "^[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}"
+    negate: true
+    match: after
+output.logstash:
+  hosts: ["logstash:5044"]

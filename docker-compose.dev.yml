@@ -1,0 +1,8 @@
+version: '2.1'
+services:
+  curator:
+    build:
+      context: curator
+      args:
+        - HTTP_PROXY=$HTTP_PROXY
+        - HTTPS_PROXY=$HTTPS_PROXY
